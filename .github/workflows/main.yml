@@ -1,0 +1,23 @@
+# .github/workflows/export.yml
+name: Export files.json
+on:
+  workflow_dispatch: {}
+  schedule: [{ cron: "0 3 * * *" }]  # daily 03:00 UTC
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i
+      - run: node export/export-files.js
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          DB_NAME: dhyeystores
+          COLL_NAME: MOVIEDB
+          OUT_PATH: ./frontend/files.json
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: refresh files.json"
+          file_pattern: frontend/files.json
